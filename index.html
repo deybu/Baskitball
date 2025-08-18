@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Basketball TImer and Score</title>
+<style>
+  /* Import the Digital-7 font */
+  @font-face {
+    font-family: 'Digital-7';
+    src: url('https://fonts.cdnfonts.com/s/17210/digital-7.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    background-color: #071022;
+    color: #f8f8f8;
+  }
+  
+  .header {
+    text-align: center;
+    padding: 20px;
+  }
+  
+  .container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 20px auto;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 20px;
+    
+  }
+  
+  .card {
+    background: #1e293b;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    padding: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .timer-card {
+    grid-column: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .scoreboard-card {
+    grid-column: 2;
+    display: flex;
+    justify-content: space-around;
+    align-items: stretch;
+    gap: 20px;
+  }
+  
+  .team-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background-color: #0f172a;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .team-name {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  
+  .score-display {
+    font-family: 'Digital-7', monospace;
+    font-size: 8rem;
+    color: #fca311;
+    line-height: 1;
+    text-shadow: 0 0 10px rgba(252, 163, 17, 0.7);
+    margin-bottom: 20px;
+  }
+  
+  .timer-display {
+    font-family: 'Digital-7', monospace;
+    font-size: 5rem;
+    color: #a3e635;
+    text-shadow: 0 0 10px rgba(163, 230, 53, 0.7);
+    letter-spacing: 2px;
+    margin: 10px 0;
+  }
+
+  .shot-clock-display {
+    font-family: 'Digital-7', monospace;
+    font-size: 5rem;
+    color: #ff5733; /* A bright, distinct color */
+    text-shadow: 0 0 10px rgba(255, 87, 51, 0.7);
+    letter-spacing: 2px;
+    margin: 10px 0;
+  }
+  
+  .foul-display {
+    font-size: 1.5rem;
+    color: #e0e0e0;
+    margin-top: 10px;
+  }
+  
+  .foul-count {
+    font-family: 'Digital-7', monospace;
+    font-size: 2rem;
+    color: #f43f5e;
+    text-shadow: 0 0 5px rgba(244, 63, 94, 0.7);
+  }
+  
+  .btn {
+    background-color: #1a56db;
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+    font-weight: 600;
+  }
+  
+  .btn:hover {
+    background-color: #2563eb;
+    transform: translateY(-2px);
+  }
+  
+  .btn:active {
+    transform: translateY(0);
+  }
+  
+  .score-btn-group, .foul-btn-group, .button-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+  }
+  
+  .controls, .settings, .team-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    margin-top: 20px;
+  }
+  
+  .controls .button-group {
+    margin: 0;
+  }
+  
+  label {
+    font-weight: 600;
+    color: #a0aec0;
+  }
+  
+  select, input[type='number'], input[type='text'] {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #475569;
+    background: #0f172a;
+    color: #f8f8f8;
+    outline: none;
+  }
+  
+  select:focus, input:focus {
+    border-color: #1a56db;
+  }
+  
+  .team-settings {
+    flex-direction: row;
+    justify-content: space-around;
+  }
+  
+  @media (max-width: 980px) {
+    .container {
+      grid-template-columns: 1fr;
+    }
+    .scoreboard-card {
+      flex-direction: column;
+    }
+    .timer-card, .scoreboard-card {
+      grid-column: 1;
+    }
+    .score-display {
+      font-size: 6rem;
+    }
+  }
+</style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>Basketball Timer & Scoreboard</h1>
+    </div>
+    <div class="container">
+      <div class="card">
+        <div class="left">
+          <div class="timer-display">
+            <span id="timerDisplay">12:00</span>
+          </div>
+          <div class="shot-clock-display">
+            <span id="shotClockDisplay">24</span>
+          </div>
+          <div class="controls">
+            <div class="button-group">
+              <button id="startPauseBtn" class="btn">Start/Pause</button>
+              <button id="stopBtn" class="btn">Stop</button>
+              <button id="resetTimerBtn" class="btn">Reset Timer</button>
+            </div>
+            <div class="button-group">
+              <button id="nextPeriodBtn" class="btn">Next Period</button>
+              <button id="resetScoresBtn" class="btn">Reset Scores</button>
+              <button id="undoBtn" class="btn">Undo</button>
+            </div>
+            <div class="button-group">
+              <button id="startShotClockBtn" class="btn">
+                Start Shot Clock (24s)
+              </button>
+              <button id="buzzerBtn" class="btn">Buzzer</button>
+            </div>
+          </div>
+          <div class="settings">
+            <label for="periodLength">Period length</label>
+            <select id="periodLength">
+              <option value="720">12:00</option>
+              <option value="600">10:00</option>
+              <option value="480">8:00</option>
+              <option value="360">6:00</option>
+            </select>
+            <label for="foulLimit">Foul limit</label>
+            <input type="number" id="foulLimit" min="1" max="15" value="5" />
+            <label for="leading">Leading Team:</label>
+            <span id="leadingEl">TIE</span>
+          </div>
+          <div class="team-settings">
+            <label for="homeNameInput">Home Team</label>
+            <input
+              type="text"
+              id="homeNameInput"
+              value="Home"
+              class="team-name-input"
+            />
+            <label for="guestNameInput">Guest Team</label>
+            <input
+              type="text"
+              id="guestNameInput"
+              value="Guest"
+              class="team-name-input"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="card scoreboard-container">
+        <div class="scoreboard-card">
+          <h2 id="homeNameEl" class="team-name">Home</h2>
+          <div class="score-display">
+            <span id="homeScoreEl">0</span>
+          </div>
+          <div class="score-btn-group">
+            <button class="btn add-score-btn" data-points="1" data-team="home">
+              +1
+            </button>
+            <button class="btn add-score-btn" data-points="2" data-team="home">
+              +2
+            </button>
+            <button class="btn add-score-btn" data-points="3" data-team="home">
+              +3
+            </button>
+          </div>
+          <div class="foul-display">
+            <span id="homeFoulsEl">0</span> Fouls
+          </div>
+          <div class="foul-btn-group">
+            <button class="btn" id="homeAddFoulBtn">+ Foul</button>
+            <button class="btn" id="homeRemoveFoulBtn">- Foul</button>
+          </div>
+        </div>
+        <div class="scoreboard-card">
+          <h2 id="guestNameEl" class="team-name">Guest</h2>
+          <div class="score-display">
+            <span id="guestScoreEl">0</span>
+          </div>
+          <div class="score-btn-group">
+            <button class="btn add-score-btn" data-points="1" data-team="guest">
+              +1
+            </button>
+            <button class="btn add-score-btn" data-points="2" data-team="guest">
+              +2
+            </button>
+            <button class="btn add-score-btn" data-points="3" data-team="guest">
+              +3
+            </button>
+          </div>
+          <div class="foul-display">
+            <span id="guestFoulsEl">0</span> Fouls
+          </div>
+          <div class="foul-btn-group">
+            <button class="btn" id="guestAddFoulBtn">+ Foul</button>
+            <button class="btn" id="guestRemoveFoulBtn">- Foul</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <audio id="buzzer" preload="auto">
+      <source src="Relapse2.wav" type="audio/wav" />
+    </audio>
+    <script>
+      let state = {
+        periodLength: 720,
+        periodCount: 4,
+        currentPeriod: 1,
+        foulLimit: 5,
+        totalSeconds: 720,
+        remainingSeconds: 720,
+        shotClockSeconds: 24,
+        shotClockRunning: false,
+        running: false,
+        home: {
+          name: 'Home',
+          score: 0,
+          fouls: 0,
+        },
+        guest: {
+          name: 'Guest',
+          score: 0,
+          fouls: 0,
+        },
+        history: [],
+      };
+
+      /* Elements */
+      const timerDisplay = document.getElementById('timerDisplay');
+      const startPauseBtn = document.getElementById('startPauseBtn');
+      const stopBtn = document.getElementById('stopBtn');
+      const resetTimerBtn = document.getElementById('resetTimerBtn');
+      const nextPeriodBtn = document.getElementById('nextPeriodBtn');
+      const periodLengthEl = document.getElementById('periodLength');
+      const foulLimitEl = document.getElementById('foulLimit');
+      const homeScoreEl = document.getElementById('homeScoreEl');
+      const guestScoreEl = document.getElementById('guestScoreEl');
+      const homeFoulsEl = document.getElementById('homeFoulsEl');
+      const guestFoulsEl = document.getElementById('guestFoulsEl');
+      const homeNameEl = document.getElementById('homeNameEl');
+      const guestNameEl = document.getElementById('guestNameEl');
+      const homeNameInput = document.getElementById('homeNameInput');
+      const guestNameInput = document.getElementById('guestNameInput');
+      const resetScoresBtn = document.getElementById('resetScoresBtn');
+      const startShotClockBtn = document.getElementById('startShotClockBtn');
+      const undoBtn = document.getElementById('undoBtn');
+      const leadingEl = document.getElementById('leadingEl');
+      const scoreAddBtns = document.querySelectorAll('.add-score-btn');
+      const homeAddFoulBtn = document.getElementById('homeAddFoulBtn');
+      const homeRemoveFoulBtn = document.getElementById('homeRemoveFoulBtn');
+      const guestAddFoulBtn = document.getElementById('guestAddFoulBtn');
+      const guestRemoveFoulBtn = document.getElementById('guestRemoveFoulBtn');
+      const buzzerBtn = document.getElementById('buzzerBtn');
+      const shotClockDisplay = document.getElementById('shotClockDisplay');
+
+      let timerInterval = null;
+      let shotClockInterval = null;
+
+      /* Init */
+      function init() {
+        startPauseBtn.addEventListener('click', () => {
+          if (state.running) {
+            pauseTimer();
+          } else {
+            startTimer();
+          }
+        });
+        stopBtn.addEventListener('click', stopTimer);
+        resetTimerBtn.addEventListener('click', () => {
+          stopTimer();
+          resetShotClock();
+          resetTimer();
+        });
+        nextPeriodBtn.addEventListener('click', nextPeriod);
+        foulLimitEl.addEventListener('change', (e) => {
+          state.foulLimit = parseInt(e.target.value);
+          saveState();
+          render();
+        });
+        periodLengthEl.addEventListener('change', (e) => {
+          state.periodLength = parseInt(e.target.value);
+          state.totalSeconds = state.periodLength;
+          state.remainingSeconds = state.totalSeconds;
+          saveState();
+          render();
+        });
+        startShotClockBtn.addEventListener('click', () => {
+          if (state.shotClockRunning) {
+            stopShotClock();
+          } else {
+            startShotClock();
+          }
+        });
+        undoBtn.addEventListener('click', undoLast);
+        resetScoresBtn.addEventListener('click', resetScores);
+        homeNameInput.addEventListener('input', (e) => {
+          state.home.name = e.target.value;
+          homeNameEl.textContent = state.home.name;
+          saveState();
+        });
+        guestNameInput.addEventListener('input', (e) => {
+          state.guest.name = e.target.value;
+          guestNameEl.textContent = state.guest.name;
+          saveState();
+        });
+
+        scoreAddBtns.forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            const team = e.target.dataset.team;
+            const points = parseInt(e.target.dataset.points);
+            addScore(team, points);
+          });
+        });
+
+        homeAddFoulBtn.addEventListener('click', () => addFoul('home'));
+        homeRemoveFoulBtn.addEventListener('click', () => removeFoul('home'));
+        guestAddFoulBtn.addEventListener('click', () => addFoul('guest'));
+        guestRemoveFoulBtn.addEventListener('click', () => removeFoul('guest'));
+        
+        // Added event listener for the new buzzer button
+        buzzerBtn.addEventListener('click', () => playBuzzer());
+
+        loadState();
+      }
+
+      function loadState() {
+        try {
+          const s = localStorage.getItem('bbstate_v1');
+          if (s) {
+            const parsed = JSON.parse(s);
+            Object.assign(state, parsed);
+          }
+        } catch (e) {
+          console.warn('Could not parse saved state');
+        }
+        render();
+      }
+
+      function saveState() {
+        localStorage.setItem('bbstate_v1', JSON.stringify(state));
+      }
+
+      function render() {
+        timerDisplay.textContent = formatTime(state.remainingSeconds);
+        shotClockDisplay.textContent = state.shotClockSeconds;
+        homeScoreEl.textContent = state.home.score;
+        guestScoreEl.textContent = state.guest.score;
+        homeFoulsEl.textContent = state.home.fouls;
+        guestFoulsEl.textContent = state.guest.fouls;
+        homeNameEl.textContent = state.home.name;
+        guestNameEl.textContent = state.guest.name;
+        homeNameInput.value = state.home.name;
+        guestNameInput.value = state.guest.name;
+        periodLengthEl.value = state.periodLength;
+        foulLimitEl.value = state.foulLimit;
+        leadingEl.textContent = getLeading();
+        startPauseBtn.textContent = state.running ? 'Pause' : 'Start';
+        startShotClockBtn.textContent = state.shotClockRunning
+          ? 'Stop Shot Clock'
+          : 'Start Shot Clock (24s)';
+      }
+
+      function formatTime(s) {
+        const minutes = Math.floor(s / 60);
+        const seconds = s % 60;
+        return `${minutes.toString().padStart(2, '0')}:${seconds
+          .toString()
+          .padStart(2, '0')}`;
+      }
+
+      function getLeading() {
+        if (state.home.score > state.guest.score) {
+          return state.home.name;
+        } else if (state.home.score < state.guest.score) {
+          return state.guest.name;
+        } else {
+          return 'TIE';
+        }
+      }
+
+      function startTimer() {
+        if (state.remainingSeconds <= 0) return;
+        state.running = true;
+        startPauseBtn.textContent = 'Pause';
+        timerInterval = setInterval(() => {
+          state.remainingSeconds--;
+          if (state.remainingSeconds <= 0) {
+            state.running = false;
+            clearInterval(timerInterval);
+            playBuzzer();
+            alert('Period ended!');
+          }
+          render();
+          saveState();
+        }, 1000);
+      }
+
+      function pauseTimer() {
+        state.running = false;
+        clearInterval(timerInterval);
+        startPauseBtn.textContent = 'Start';
+        saveState();
+      }
+
+      function stopTimer() {
+        pauseTimer();
+        resetTimer();
+        saveState();
+      }
+
+      function resetTimer() {
+        state.remainingSeconds = state.totalSeconds;
+        render();
+        saveState();
+      }
+
+      function nextPeriod() {
+        if (state.currentPeriod < state.periodCount) {
+          if (state.remainingSeconds > 0) {
+            if (!confirm('Period is not over yet. Continue to next period?')) {
+              return;
+            }
+          }
+          state.currentPeriod++;
+          state.remainingSeconds = state.totalSeconds;
+          state.home.fouls = 0;
+          state.guest.fouls = 0;
+          saveState();
+          render();
+        } else {
+          alert('Game Over!');
+        }
+      }
+
+      function startShotClock() {
+        if (state.shotClockRunning) {
+          return;
+        }
+        state.shotClockRunning = true;
+        startShotClockBtn.textContent = 'Stop Shot Clock';
+        shotClockInterval = setInterval(() => {
+          if (state.shotClockSeconds > 0) {
+            state.shotClockSeconds--;
+            render();
+            saveState();
+          } else {
+            stopShotClock(true);
+          }
+        }, 1000);
+      }
+
+      function stopShotClock(violation = false) {
+        state.shotClockRunning = false;
+        clearInterval(shotClockInterval);
+        startShotClockBtn.textContent = 'Start Shot Clock (24s)';
+        if (violation) {
+          playBuzzer();
+          alert('Shot Clock Violation!');
+        }
+        render();
+        saveState();
+      }
+
+      function resetShotClock() {
+        state.shotClockSeconds = 24;
+        stopShotClock();
+        render();
+      }
+
+      function addScore(team, points) {
+        const prevScore = state[team].score;
+        state[team].score += points;
+        pushHistory({
+          type: 'score',
+          team: team,
+          prev: prevScore,
+        });
+        saveState();
+        render();
+      }
+
+      function addFoul(team) {
+        const prevFouls = state[team].fouls;
+        state[team].fouls++;
+        pushHistory({
+          type: 'foul',
+          team: team,
+          prev: prevFouls,
+        });
+        saveState();
+        render();
+        if (state[team].fouls > state.foulLimit) {
+          alert(
+            `${
+              state[team].name
+            } is over the foul limit! Free throws should be awarded.`
+          );
+        }
+      }
+
+      function removeFoul(team) {
+        if (state[team].fouls > 0) {
+          const prevFouls = state[team].fouls;
+          state[team].fouls--;
+          pushHistory({
+            type: 'foul',
+            team: team,
+            prev: prevFouls,
+          });
+          saveState();
+          render();
+        }
+      }
+
+      function pushHistory(action) {
+        state.history.push(action);
+        if (state.history.length > 50) {
+          state.history.shift();
+        }
+      }
+
+      function undoLast() {
+        if (state.history.length > 0) {
+          const lastAction = state.history.pop();
+          if (lastAction.type === 'score') {
+            state[lastAction.team].score = lastAction.prev;
+          } else if (lastAction.type === 'foul') {
+            state[lastAction.team].fouls = lastAction.prev;
+          }
+          saveState();
+          render();
+        }
+      }
+
+      function resetScores() {
+        if (confirm('Are you sure you want to reset all scores and fouls?')) {
+          state.home.score = 0;
+          state.guest.score = 0;
+          state.home.fouls = 0;
+          state.guest.fouls = 0;
+          state.history = [];
+          saveState();
+          render();
+        }
+      }
+
+      function playBuzzer() {
+        const audio = document.getElementById('buzzer');
+        if (audio) {
+          audio.currentTime = 0;
+          audio.play().catch((e) => console.warn('Buzzer playback failed:', e));
+        }
+      }
+
+      /* Initialize */
+      init();
+    </script>
+  </body>
+</html>
